@@ -6,27 +6,6 @@ receivers:
       grpc:
         endpoint: 0.0.0.0:4317
 
-processors:
-  batch:
-    send_batch_size: 10000
-    timeout: 10s
-  tail_sampling:
-    decision_wait: 2s
-    num_traces: 100
-    expected_new_traces_per_sec: 1
-    policies:
-      [
-          # {
-          #   name: test-policy-1,
-          #   type: status_code,
-          #   status_code: {status_codes: [ERROR]}
-          # },
-          # {
-          #   name: test-policy-2,
-          #   type: latency,
-          #   latency: {threshold_ms: 1500}
-          # },
-      ]
 exporters:
   prometheus:
     endpoint: "0.0.0.0:9090"
@@ -39,7 +18,7 @@ exporters:
       insecure: true
   elasticsearch:
     endpoints: [ http://elasticsearch:9200 ]
-    index: "Spring-applications" 
+    index: "applogs" 
     tls:
       insecure: true      
 
@@ -55,13 +34,10 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [tail_sampling, batch]
       exporters: [logging, jaeger]
     metrics:
       receivers: [otlp]
-      processors: [batch]
       exporters: [logging, prometheus]
     logs:
       receivers: [otlp]
-      processors: [batch]
       exporters: [logging, elasticsearch]

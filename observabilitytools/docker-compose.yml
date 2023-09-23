@@ -52,7 +52,7 @@
         test: "curl -f http://localhost:5601 || exit 1"
   #3.Jaeger
     jaeger-collector:
-      image: jaegertracing/jaeger-collector
+      image: jaegertracing/jaeger-collector:1.40
       ports:
         - "14269:14269"
         - "14268:14268"
@@ -73,7 +73,7 @@
       depends_on:
         - elasticsearch
     jaeger-query:
-      image: jaegertracing/jaeger-query
+      image: jaegertracing/jaeger-query:1.40
       environment:
         - SPAN_STORAGE_TYPE=elasticsearch
         - no_proxy=localhost
