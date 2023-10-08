@@ -1,0 +1,52 @@
+apiVersion: elasticsearch.k8s.elastic.co/v1
+kind: Elasticsearch
+metadata:
+  name: quickstart
+  namespace: observability
+spec:
+  version: 7.5.0
+  # auth:
+  #   fileRealm:
+  #   - secretName: my-filerealm-secret
+  nodeSets:
+  - name: default
+    count: 1
+    config:
+      node.master: true
+      node.data: true
+      node.ingest: true
+      node.store.allow_mmap: false
+      xpack.security.enabled: true
+      xpack.monitoring.collection.enabled: true
+      xpack.security.http.ssl.verification_mode: certificate  
+    volumeClaimTemplates:
+    - metadata:
+        name: elasticsearch-data # Do not change this name unless you set up a volume mount for the data path.
+      spec:
+        accessModes:
+        - ReadWriteMany
+        resources:
+          requests:
+            storage: 1.5Gi
+        storageClassName: standard      
+    podTemplate:
+      spec:
+        containers:
+          - name: elasticsearch
+            readinessProbe:
+              exec:
+                command:
+                - bash
+                - -c
+                - /mnt/elastic-internal/scripts/readiness-probe-script.sh
+              failureThreshold: 3
+              initialDelaySeconds: 10
+              periodSeconds: 12
+              successThreshold: 1
+              timeoutSeconds: 15
+            env:
+            - name: READINESS_PROBE_TIMEOUT
+              value: "12"    
+    #   spec:
+    #     nodeSelector:
+    #       observability: opentelemetry

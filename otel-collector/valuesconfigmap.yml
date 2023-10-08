@@ -1,0 +1,96 @@
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: otel
+  namespace: observability
+spec:
+  image: otel/opentelemetry-collector-contrib:0.76.1
+  # nodeSelector:
+  #   observability: opentelemetry
+  volumeMounts:
+    - name: certificates
+      mountPath: /es/certificates/
+      readOnly: true
+  volumes:
+    - name: certificates
+      secret:
+        secretName: quickstart-es-http-certs-internal 
+  ports:
+    - name: otlp-grpc
+      port: 4317
+      protocol: TCP
+      targetPort: 4317
+    - name: otlp-http
+      port: 4318
+      protocol: TCP
+      targetPort: 4318    
+    - name: metrics
+      port: 8888
+      protocol: TCP
+      targetPort: 8888
+    - name: metric1
+      port: 9090
+      targetPort: 9090
+      protocol: TCP      
+  env:
+    - name: MY_POD_IP
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: status.podIP
+    - name: ES_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: quickstart-es-elastic-user
+          key: elastic
+    - name: WATCH_NAMESPACE 
+      value: observability 
+  config: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: ${env:MY_POD_IP}:4317
+          http:
+            endpoint: ${env:MY_POD_IP}:4318
+    processors:
+      memory_limiter:
+        check_interval: 1s
+        limit_percentage: 75
+        spike_limit_percentage: 15
+      batch:
+        send_batch_size: 10000
+        timeout: 10s
+    exporters:
+      prometheus:
+        endpoint: ":9090"    
+      logging:
+        loglevel: debug
+      jaeger:
+        endpoint: "simple-prod-collector:14250"
+        tls:
+            insecure: true
+      elasticsearch:
+        endpoints: "https://quickstart-es-http:9200"
+        user: elastic
+        password: ${env:ES_PASSWORD}
+        index: "applicationlogs"  
+        tls:
+          ca_file: /es/certificates/ca.crt  
+    service:
+      telemetry:
+        metrics:
+          address: ${env:MY_POD_IP}:8888    
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [jaeger]
+        metrics:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [prometheus]
+        logs:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [elasticsearch]   

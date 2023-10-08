@@ -1,0 +1,28 @@
+apiVersion: kibana.k8s.elastic.co/v1
+kind: Kibana
+metadata:
+  name: kibana
+  namespace: observability
+spec:
+  version: 7.5.0
+  count: 1
+  elasticsearchRef:
+    name: quickstart
+    namespace: observability
+  podTemplate:
+    spec:
+      # nodeSelector:
+      #   observability: opentelemetry    
+      containers:
+      - name: kibana
+        env:
+          - name: NODE_OPTIONS
+            value: "--max-old-space-size=512"
+        resources:
+          requests:
+            memory: 0.25Gi
+            cpu: 0.5
+          limits:
+            memory: 0.5Gi
+            cpu: 1
+            
