@@ -23,12 +23,11 @@ spec:
     - metadata:
         name: elasticsearch-data # Do not change this name unless you set up a volume mount for the data path.
       spec:
-        accessModes:
-        - ReadWriteMany
+        accessModes: ["ReadWriteOnce"]
         resources:
           requests:
-            storage: 1.5Gi
-        storageClassName: standard      
+            storage: 5Gi
+        storageClassName: default      
     podTemplate:
       spec:
         containers:
