@@ -3,6 +3,9 @@ kind: Deployment
 metadata:
   name: spring-petclinic
   namespace: observability
+  annotations:
+    sidecar.opentelemetry.io/inject: "true"
+    instrumentation.opentelemetry.io/inject-java: "true"  
 spec:
   selector:
     matchLabels:
@@ -18,7 +21,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: <your image>
+          image: shahhameed47/springbootdemo:1.0
           env:
             - name: OTEL_LOGS_EXPORTER
               value: otlp

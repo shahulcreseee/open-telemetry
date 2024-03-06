@@ -5,7 +5,6 @@ metadata:
   namespace: observability
 spec:
   strategy: production
-  query:
   storage:
     type: elasticsearch
     options:

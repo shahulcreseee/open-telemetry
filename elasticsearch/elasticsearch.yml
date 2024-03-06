@@ -46,6 +46,5 @@ spec:
             env:
             - name: READINESS_PROBE_TIMEOUT
               value: "12"    
-    #   spec:
-    #     nodeSelector:
-    #       observability: opentelemetry
+        nodeSelector:
+          observability: opentelemetry

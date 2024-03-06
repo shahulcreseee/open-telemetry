@@ -12,4 +12,4 @@ data:
     scrape_configs:
     - job_name: 'Otel-Scrape'
       static_configs:
-      - targets: ['otel-collector.observability.svc.cluster.local:9090']
+      - targets: ['otel-collector:9090']

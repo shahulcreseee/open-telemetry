@@ -11,8 +11,8 @@ spec:
     namespace: observability
   podTemplate:
     spec:
-      # nodeSelector:
-      #   observability: opentelemetry    
+      nodeSelector:
+        observability: opentelemetry    
       containers:
       - name: kibana
         env:
